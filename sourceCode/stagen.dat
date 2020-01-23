@@ -1,0 +1,18 @@
+    287.5000      1.4000 GAS CONSTANT, GAMMA
+        37        37     IM, KM 
+      1.2500     20.0000  FPRAT,  FPMAX
+      1.2500     20.0000  FRRAT,  FRMAX
+         0               IFDEFAULTS 
+         0         3     NOWS, N SECTIONS 
+     1.000               SCALING FACTOR 
+  PUPHUB, PUPTIP, PDHUB,PDTIP 
+            NaN            NaN            NaN            NaN     INLET AND EXIT STATIC PRESSURES
+  BLANK LINE 
+    2                   NUMBER OF POINTS FOR INLET BOUNDARY CONDITIONS
+   0.00000000       1.00000000                FRAC SPAN AT INLET 
+   200000.000       200000.000                STAGNATION PRESSURE 
+   287.000000       287.000000                STAGNATION TEMPERATURE
+   0.00000000       0.00000000                TANGENTIAL VELOCITY
+   0.00000000       0.00000000                MERIDIONAL VELOCITY 
+  -16.6992550      -16.6992550                YAW ANGLE IN
+              NaN              NaN            PITCH ANGLE IN

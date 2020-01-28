@@ -102,6 +102,7 @@ def meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,H_r_des,AR):
     # Rotor blade height at inlet, outlet and average
     H1 = massFlow_opt/(inletRho*phi*U*2*pi*radiusDes)
     H2 = massFlow_opt/(outletRho*phi*U*2*pi*radiusDes)
+    
     H_bar = (H1+H2)*0.5
     # Calculate axial chord
     c_ax = H_bar/AR
@@ -121,12 +122,11 @@ def optimiseMeangenInput(x0,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_a
     inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,x0*massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc)      
     # Run Meangen
     os.system('./runMeangen.sh')        
+
+    with open("meandesign.out", "r") as f:
+        lines = f.readlines()
     
-    f = open('meandesign.out')
-    lines = f.readlines()
-    f.close()
-    ii = 0    
-    for line in lines:
+    for ii, line in enumerate(lines):
         # Extract H/R for stator or leading edge of the rotor    
         if (ii > 27) and (ii < 29):
             H_r1_meangen = float(line.split()[-1])
@@ -143,7 +143,6 @@ def optimiseMeangenInput(x0,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_a
             TETs_meangen = float(line.split()[-1])
         elif (ii > 57) and (ii < 59):
             radiusDes_meangen = float(line.split()[-1])        
-        ii = ii+ 1
     
     H_r_calculated = (H_r1_meangen+H_r2_meangen)*0.5
     error_Hr = abs((1- H_r_calculated/H_r_des))
@@ -201,11 +200,10 @@ inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow_coeff*massFlow
 # Run Meangen
 os.system('./runMeangen.sh')        
 
-f = open('meandesign.out')
-lines = f.readlines()
-f.close()
-ii = 0    
-for line in lines:
+with open("meandesign.out", "r") as f:
+    lines = f.readlines()
+ 
+for ii, line in enumerate(lines):
     # Extract H/R for stator or leading edge of the rotor    
     if (ii > 27) and (ii < 29):
         H_r1_meangen = float(line.split()[-1])
@@ -222,7 +220,6 @@ for line in lines:
         TETc_meangen = float(line.split()[-1])
     elif (ii > 57) and (ii < 59):
         radiusDes_meangen = float(line.split()[-1])        
-    ii = ii+ 1
 
 H_r_calculated = (H_r1_meangen+H_r2_meangen)*0.5
 error_Hr = abs((1- H_r_calculated/H_r_des))

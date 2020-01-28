@@ -36,19 +36,19 @@ for folder in folders:
         # Extract blade numbers
         if ii == 0:
             stator_value.append(int(line.split()[-1]))
-        if (ii > 0) and (ii < 2):
+        elif (ii > 0) and (ii < 2):
             rotor_value.append(int(line.split()[-1]))
         # Extract flow angles and other parameters of the stator
-        if (ii > 6) and (ii < 8):
+        elif (ii > 6) and (ii < 8):
             stator_value.append(float(line.split()[-2]))
             stator_value.append(float(line.split()[-1]))
-        if (ii > 7) and (ii < 23):
+        elif (ii > 7) and (ii < 23):
             stator_value.append(float(line.split()[-1]))
         # Extract flow angles and other parameters of the rotor
-        if (ii > 26) and (ii < 28):
+        elif (ii > 26) and (ii < 28):
             rotor_value.append(float(line.split()[-2]))
             rotor_value.append(float(line.split()[-1]))
-        if (ii > 27) and (ii < 43):
+        elif (ii > 27) and (ii < 43):
             rotor_value.append(float(line.split()[-1]))
         ii = ii+ 1
     # Append values to the dataframes

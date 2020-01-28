@@ -135,12 +135,14 @@ massFlow = 25
 H_r_des = 0.2
 # Aspect ratio
 AR = 2
+# TE thickness to pitch
+TETs = 0.02
 # Zweifel coefficient
 Zcr = 0.9
 
 # Call functions and assign values
 alpha1,alpha2,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta = meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,H_r_des,AR)
 solidity = Zweifel(Zcr,alpha1,alpha2)
-
-from inputMeangen_old import inputMeangen
-inputMeangen(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta)
+TETc = (TETs/solidity)
+from inputMeangen_new import inputMeangen_new
+inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta,TETc)

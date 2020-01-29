@@ -10,11 +10,11 @@ from scipy import interpolate
 fluid = 'air'
 
 # Extract pitch and chord from meangen.out per folder
-folders = sorted(os.listdir("/home/kjohri/Documents/bladeGeneration/"+fluid))
+folders = sorted(os.listdir("/home/kjohri/Documents/codeThesis/"+fluid))
 number = 2
 for number in range(9):
     folder = folders[number]
-    os.chdir("/home/kjohri/Documents/bladeGeneration/air/"+folder)
+    os.chdir("/home/kjohri/Documents/codeThesis/"+fluid+"/"+folder)
     f = open('meandesign.out')
     lines = f.readlines()
     f.close()
@@ -22,13 +22,13 @@ for number in range(9):
     stator_value = []    
     rotor_value = []
     for line in lines:
-        # Extract flow angles and other parameters of the stator
-        if (ii > 39) and (ii < 41):
-            chord = (float(line.split()[-1]))
-        if (ii > 41) and (ii < 43):
-            pitch = (float(line.split()[-1]))
+        # Extract solidity and chord to find pitch for rotor
+        if (ii > 51) and (ii < 53):
+            solidity = (float(line.split()[-1]))
+        elif (ii > 53) and (ii < 55):
+            chord = (float(line.split()[-1]))            
         ii = ii+ 1
-    
+    pitch = chord/solidity
     # Extract all coordinates from profile
     f = open('rotor_profile.curve')
     lines = f.readlines()
@@ -39,7 +39,7 @@ for number in range(9):
     y_coords = []
     
     ii = 0
-    for line in lines:
+    for line in lines_coords:
         if (ii > 0) and (ii <+ len(lines)-1):
             x_coords.append(float(line.split()[0])*chord)
             y_coords.append(float(line.split()[1])*chord)
@@ -119,7 +119,7 @@ for number in range(9):
     plt.title('$\phi$='+str(int(folder[0:4])/1000)+','+'$\psi$='+str(int(folder[4:])/1000))
 
 #%% Generating Geometry file
-os.chdir("/home/kjohri/Documents/bladeGeneration/air/"+folder+'/Db')
+os.chdir("/home/kjohri/Documents/codeThesis/air/"+folder+'/Db')
 
 # Create and write in new file
 f = open('geometry.rotor', 'w')

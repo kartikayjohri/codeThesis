@@ -3,14 +3,14 @@
   TE THICKNESS / AXIAL CHORD            =    3.99999991E-02
   MAXIMUM THICKNESS                     =   0.300000012    
   POINT OF MAXIMUM THICKNESS            =   0.449999988    
-  STAGGER ANGLE                         =    46.8474846    
-  STAGGER ANGLE                         =    46.7568092    
-  STAGGER ANGLE                         =    46.6663208    
+  STAGGER ANGLE                         =               NaN
+  STAGGER ANGLE                         =               NaN
+  STAGGER ANGLE                         =               NaN
   ********** NEW BLADE ROW **********
   LE THICKNESS / CHORD                  =    3.99999991E-02
-  TE THICKNESS / CHORD                  =    3.99999991E-02
+  TE THICKNESS / CHORD                  =    5.95999993E-02
   MAXIMUM THICKNESS                     =   0.250000000    
   POINT OF MAXIMUM THICKNESS            =   0.400000006    
-  STAGGER ANGLE                         =   -46.5610771    
-  STAGGER ANGLE                         =   -46.7568092    
-  STAGGER ANGLE                         =   -46.9516220    
+  STAGGER ANGLE                         =               NaN
+  STAGGER ANGLE                         =               NaN
+  STAGGER ANGLE                         =               NaN

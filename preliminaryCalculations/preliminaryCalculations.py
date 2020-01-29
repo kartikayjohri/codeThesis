@@ -5,19 +5,19 @@ FUNCTION: To perform preliminary calculations for Meangen and then optimise
 """
 
 # Import modules
-
 import os
+import time
 import numpy as np
 import CoolProp.CoolProp as CP
-from scipy.optimize import minimize_scalar
-#from scipy.optimize import minimize
 from math import sqrt,cos,tan,atan,pi
+from scipy.optimize import minimize_scalar
 from inputMeangen_new import inputMeangen_new
 
+# Measure run time
+start_time = time.time()
 #%% Define functions 
 
 #% Define function to find optimum Tr for Pr = 1
-# x0 is the initial guess of a factor   
 def TcritEval(x0,Fluid,zInput):
     # Z at which Tcrit is to be found for the fluid
     fluid = Fluid   
@@ -86,10 +86,10 @@ def meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,H_r_des,AR):
     DR = PR**-Gamma
     # Velocity triangle
     alpha1 = atan(((psi/2)+1-R)/phi) # radians
-    beta2  = -alpha1 # radians
     beta1  = atan(tan(alpha1)-(1/phi)) # radians
     alpha2 = -beta1 # radians
-    
+    beta2  = -alpha1 # radians
+
     # Iterate over massflow to determine the optimum mass flow for requirements
     bnds1 = ((1E-3, 1000))
     res1 = minimize_scalar(optimumMassFlow, bounds=bnds1,args=(phi,psi,R,DeltaH0,massFlow,RPM,inletRho,H_r_des,), tol = 1e-5, method='bounded')
@@ -154,80 +154,93 @@ def optimiseMeangenInput(x0,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_a
 #    inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,x0*massFlow,c_ax_new,RPM,DeltaH0,eta,solidity,TETc_new)      
     return error_Hr
     
-#%% Write inputs and call functions 
+#%% Write Inputs 
 
 # Fluid
 FLUID = 'air'
 # Compressibility
-Z = 1
+Z = 1.0
 # Stage coefficients
-PHI = 0.8
-PSI = 1.3
+phi_range = np.linspace(0.5,1.3,3)
+psi_range = np.linspace(0.8,2.5,3)
 Rinput = 0.5
 # Design pressure ratio
 pressure_ratio = 2
 # Machine design
 RPM = 9000
 massFlow = 25
-# Geometrical parameters
+## Geometrical parameters
 # Blade height to design radius
 H_r_des = 0.2
 # Aspect ratio
-AR = 2
+AR = 1.2
 # TE thickness to pitch
 TETs = 0.02
 # Zweifel coefficient
 Zcr = 0.9
+# Create path to generate folders
+pathFluid = '/home/kjohri/Documents/codeThesis/'+FLUID
 
-# Call function to write preliminary meangen file
-alpha1,alpha2,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta = meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,H_r_des,AR)
-# Calculate solidity to input TE thickness to chord 
-solidity = Zweifel(Zcr,alpha1,alpha2)
-TETc = (TETs/solidity)
+# Check if path exists
+if os.path.isdir(pathFluid) == False:
+    os.mkdir(pathFluid)
 
-# Write 1st meangen.in
-#inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc)
-# Run 1st meangen file
-#os.system('./runMeangen.sh')
+# Start iterating over Smith chart values
+for PHI in phi_range:
+    for PSI in psi_range:
+        # Preliminary calculations
+        alpha1,alpha2,PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta = meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,H_r_des,AR)
+        # Calculate solidity to input TE thickness to chord 
+        solidity = Zweifel(Zcr,alpha1,alpha2)
+        TETc = (TETs/solidity)
+        # Optimise meangen.in by iterating over massflow for H_rmean
+        bnds = ((0.5, 5))
+        res = minimize_scalar(optimiseMeangenInput,bounds=bnds,args=(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc,H_r_des,AR,TETs), tol = 1e-5, method='bounded')
+        massFlow_coeff = res.x
+        # Write meangen.in file with optimum mass flow such that H_rmean calculated = H_rmean desired
+        inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow_coeff*massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc)      
+        # Run Meangen
+        os.system('./runMeangen.sh')        
+        # Read meangen output values to finalise the input for 
+        f = open('meandesign.out')
+        lines = f.readlines()
+        f.close()
+        ii = 0    
+        for line in lines:
+            # Extract H/R for stator or leading edge of the rotor    
+            if (ii > 27) and (ii < 29):
+                H_r1_meangen = float(line.split()[-1])
+            # Extract solidity
+            elif (ii > 51) and (ii < 53):
+                Solidity_meangen = float(line.split()[-1])
+            # Extract Aspect Ratio of the rotor row
+            elif (ii > 52) and (ii < 54):
+                AR_meangen = float(line.split()[-1])
+            # Extract H/R for trailing edge of the rotor    
+            elif (ii > 55) and (ii < 57):
+                H_r2_meangen = float(line.split()[-1])
+            elif (ii > 56) and (ii < 58):
+                TETc_meangen = float(line.split()[-1])
+            elif (ii > 57) and (ii < 59):
+                radiusDes_meangen = float(line.split()[-1])        
+            ii = ii+ 1
+        
+        H_r_calculated = (H_r1_meangen+H_r2_meangen)*0.5
+        # Calculate the optimum axial chord such that AR calculated = AR desired        
+        c_ax_new = H_r_calculated*radiusDes_meangen/AR
+        # Calculate the optimum TETc such that TETs calculated = TETs desired                
+        TETs_meangen = TETc_meangen*Solidity_meangen
+        # Write meangen.in with final values 
+        inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow_coeff*massFlow,c_ax_new,RPM,DeltaH0,eta,solidity,TETc)      
+        
+        # Name folders
+        foldername = '{:.3f}'.format(PHI).replace('.', '')+'{:.3f}'.format(PSI).replace('.', '')
+        # Make folder 
+        os.mkdir(pathFluid+'/'+str(foldername))
+        # Make Db folder for meshing
+        os.mkdir(pathFluid+'/'+str(foldername)+'/Db')
+        # Move files        
+        os.system('mv *.in '+pathFluid+'/'+str(foldername))
 
-bnds = ((0.5, 5))
-res = minimize_scalar(optimiseMeangenInput,bounds=bnds,args=(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc,H_r_des,AR,TETs), tol = 1e-5, method='bounded')
-massFlow_coeff = res.x
-
-
-#%% 
-
-inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow_coeff*massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc)      
-# Run Meangen
-os.system('./runMeangen.sh')        
-
-f = open('meandesign.out')
-lines = f.readlines()
-f.close()
-ii = 0    
-for line in lines:
-    # Extract H/R for stator or leading edge of the rotor    
-    if (ii > 27) and (ii < 29):
-        H_r1_meangen = float(line.split()[-1])
-    # Extract solidity
-    elif (ii > 51) and (ii < 53):
-        Solidity_meangen = float(line.split()[-1])
-    # Extract Aspect Ratio of the rotor row
-    elif (ii > 52) and (ii < 54):
-        AR_meangen = float(line.split()[-1])
-    # Extract H/R for trailing edge of the rotor    
-    elif (ii > 55) and (ii < 57):
-        H_r2_meangen = float(line.split()[-1])
-    elif (ii > 56) and (ii < 58):
-        TETc_meangen = float(line.split()[-1])
-    elif (ii > 57) and (ii < 59):
-        radiusDes_meangen = float(line.split()[-1])        
-    ii = ii+ 1
-
-H_r_calculated = (H_r1_meangen+H_r2_meangen)*0.5
-error_Hr = abs((1- H_r_calculated/H_r_des))
-c_ax_new = H_r_calculated*radiusDes_meangen/AR
-TETs_meangen = TETc_meangen*Solidity_meangen
-#
-inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow_coeff*massFlow,c_ax_new,RPM,DeltaH0,eta,solidity,TETc)      
-
+#%% Execution time
+print("--- %s seconds ---" % (time.time() -start_time))

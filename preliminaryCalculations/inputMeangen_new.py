@@ -2,8 +2,7 @@
 FUNCTION: WRITE MEANGEN INPUT FILE
 @author: kjohri
 """
-
-def inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,DeltaH0,eta,solidity,TETc):
+def inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,deltaH0is,eta,solidity,TETc):
     # Write meangen
     file = open("meangen.in","w") 
     file.write("T \n")                  # TURBO_TYP,"C" FOR A COMPRESSOR,"T" FOR A TURBINE
@@ -17,8 +16,8 @@ def inputMeangen_new(PHI,PSI,Rinput,Rgas,Gamma,inletP,inletT,massFlow,c_ax,RPM,D
     file.write("A \n")                  # INTYPE, TO CHOOSE THE METHOD OF DEFINING THE VELOCITY TRIANGLES
     file.write(str(Rinput)+" "+str(PHI)+" "+str(PSI)+"\n")  # REACTION, FLOW COEFF., LOADING COEFF.
     file.write("B \n")                  # RADTYPE, TO CHOOSE THE ENTHALPY DROP
-    file.write(str(DeltaH0/1000)+"\n")  # ENTHALPY DROP IN KJ/kg
-    file.write("0.050 "+str(c_ax)+"\n") # BLADE AXIAL CHORDS IN METRES.
+    file.write(str(deltaH0is/1000)+"\n")  # ENTHALPY DROP IN KJ/kg
+    file.write(str(c_ax[0])+" "+str(c_ax[1])+"\n") # BLADE AXIAL CHORDS IN METRES.
     file.write("0.250  0.500 \n")       # ROW GAP  AND STAGE GAP 
     file.write("1.000  1.000 \n")       # EXPONENT TO MOVE BLADE LOADING TK_TYP_S AND TK_TYP_R
     file.write("0.040  0.040 \n")       # LE THICKNESS TO CHORD RATIO  

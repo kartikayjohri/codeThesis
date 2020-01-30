@@ -39,7 +39,7 @@ for number in range(9):
     y_coords = []
     
     ii = 0
-    for line in lines_coords:
+    for line in lines:
         if (ii > 0) and (ii <+ len(lines)-1):
             x_coords.append(float(line.split()[0])*chord)
             y_coords.append(float(line.split()[1])*chord)

@@ -1,0 +1,37 @@
+           curve type     periodic curve    Modifiable curve
+                   8                   0                   0
+                   8                   0                   0
+                   1                   0                   0
+                   4                   7                   0
+                   4                   8                   0
+                   4                   9                   0                                     
+                   5                   4                   0
+                   5                   5                   0
+                   5                   6                   0                  
+                   3                   0                   0                   
+Number of ZONE
+1
+ZONE 1
+ 1
+ 2
+ 4
+ 5
+ 6
+ 10
+ 9
+ 8
+ 7
+-3
+
+1  far-field/inflow
+2  symmetry
+3  outflow
+4  periodic1
+5  periodic2
+8  wall1
+9  wall2
+10 wall3
+11 wall4
+12 wall5
+13 wall6
+

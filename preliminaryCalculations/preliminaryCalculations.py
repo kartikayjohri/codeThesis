@@ -187,11 +187,11 @@ FLUID = 'air'
 # Compressibility
 Z = 1.0
 # Stage coefficients
-phi_range = np.linspace(0.5,1.3,3)
-psi_range = np.linspace(0.8,2.5,3)
+phi_range = np.linspace(0.5,1.2,3)
+psi_range = np.linspace(0.8,2,3)
 Rinput = 0.5
 # Design pressure ratio
-pressure_ratio = 4
+pressure_ratio = 2
 # Machine design
 RPM = 9000
 massFlow = 25
@@ -199,11 +199,16 @@ massFlow = 25
 # Blade height to design radius
 Hr_des = 0.2
 # Aspect ratio
-AR = [2,1.5]
+AR = [1.2,1.2]
 # TE thickness to pitch
 TETs = 0.02
 # Zweifel coefficient
-Zcr = 0.9
+#Zcr = 0.95
+Zcr_tab = np.ones((3,3))
+Zcr_tab[:,0] = np.linspace(1.1,0.7,3)
+Zcr_tab[:,-1] = np.linspace(0.9,0.8,3)
+for row in range(0,np.shape(Zcr_tab)[0]):
+    Zcr_tab[row,:] = np.linspace(Zcr_tab[row,0],Zcr_tab[row,-1],3)
 # Create path to generate folders
 pathFluid = '/home/kjohri/Documents/codeThesis/'+FLUID
 
@@ -213,11 +218,14 @@ if os.path.isdir(pathFluid) == False:
     os.mkdir(pathFluid)
 
 # Start iterating over Smith chart values
+counter_phi = 0
 for PHI in phi_range:
+    counter_psi = 0
     for PSI in psi_range:
         # Preliminary calculations
         PHI,PSI,Rinput,massFlow_opt,RPM,Hr_des,AR,Rgas,Gamma,inletP,inletT,c_ax,deltaH0,deltaH0is,eta,alpha1,alpha2 = meangenInputs(PHI,PSI,Rinput,Z,pressure_ratio,massFlow,RPM,Hr_des,AR)
         # Calculate solidity to input TE thickness to chord 
+        Zcr = Zcr_tab[counter_psi][counter_phi]        
         solidity = Zweifel(Zcr,alpha1,alpha2)
         TETc = (TETs/solidity)
         # Optimise meangen.in by iterating over massflow for H_rmean
@@ -278,6 +286,74 @@ for PHI in phi_range:
         os.mkdir(pathFluid+'/'+str(foldername)+'/Db')
         # Move files        
         os.system('mv *.in '+pathFluid+'/'+str(foldername))
-
+        # Up the counter 
+        counter_psi = counter_psi + 1
+    counter_phi = counter_phi + 1
 #%% Execution time
 print("--- %s seconds ---" % (time.time() -start_time))
+
+
+#%%%%
+
+#import numpy as np
+#import matplotlib.pyplot as plt
+#
+## Zweifel across psi
+#Zcr_dist = np.ones((51,18))
+#Zcr_dist[:,:] = np.linspace(1.1,0.90,51).reshape(51,1)
+### Zweifel across phi and psi
+#Zcr_dist1 = np.ones((51,18))
+#Zcr_dist1[:,0] = np.linspace(1.1,0.7,51)
+#Zcr_dist1[:,-1] = np.linspace(0.9,0.8,51)
+#for row in range(0,np.shape(Zcr_dist)[0]):
+#    Zcr_dist1[row,:] = np.linspace(Zcr_dist1[row,0],Zcr_dist1[row,-1],18)
+## Fixed Zweifel
+#Zcr = 0.95
+#
+#phi_range = np.linspace(0.5,1.2,18)
+#psi_range = np.linspace(0.8,2,51)
+#phi,psi = np.meshgrid(phi_range,psi_range)
+#R = 0.5
+#
+#alpha1 = np.arctan(((psi/2)+1-R)/phi)
+#beta1  = np.arctan(np.tan(alpha1)-(1/phi))  # radians
+#alpha2 = -beta1
+#
+#sigma = 2*(1/Zcr)*(np.tan(alpha1)+np.tan(alpha2))*np.cos(alpha1)**2
+#sigma_dist = 2*(1/Zcr_dist)*(np.tan(alpha1)+np.tan(alpha2))*np.cos(alpha1)**2
+#sigma_dist1 = 2*(1/Zcr_dist1)*(np.tan(alpha1)+np.tan(alpha2))*np.cos(alpha1)**2
+#
+#plt.figure()
+#plt.contourf(phi,psi,sigma,20)
+#plt.colorbar()
+#
+#plt.figure()
+#plt.contourf(phi,psi,sigma_dist,20)
+#plt.colorbar()
+#
+#plt.figure()
+#plt.contourf(phi,psi,sigma_dist1,20)
+#plt.colorbar()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

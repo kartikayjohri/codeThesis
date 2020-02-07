@@ -1,0 +1,21 @@
+    thk_bl      n BC      GEOM        CV
+     1.0e-8         5       axl         1
+
+  PITCH           xc             yc 
+   0.0580668    0.0000000      0.0000000
+
+  1 INFLOW   h_min   h_max  Node per RadCRv
+                1e-4  1e-4  5.
+  3 OUTFLOW  h_min   h_max  Node per RadCRv
+                1e-4  1e-4  5.
+  4 PERIO    h_min   h_max  Node per RadCRv
+                1e-4  1e-4  5.
+  5 PERIO    h_min   h_max  Node per RadCRv
+                1e-4  1e-4  5.
+  8 BLADE    h min   h max  Node per RadCRv
+                1e-6  1e-6   10.
+
+  NZONES
+  0
+  RADIUS      XC           YC        h
+  0.1     0.0145       0.019336   0.000005
